@@ -1,0 +1,18 @@
+_BASE_: R50.yaml
+MODEL:
+    BACKBONE:
+        NAME: "PVT_V2_B2"
+        NUM_FEATURES: (64, 128, 320, 512)
+        FEATURE_KEYS: ["res2", "res3", "res4", "res5"]
+    NECK:
+        NAME: "FPN"  # 使用原有的FPN
+    GAZE_SHIFT_HEAD:
+        NUM_BLOCKS: 2
+    # PVT预训练权重路径（需要下载）
+    WEIGHTS: ""  # "assets/pretrained/pvt_v2_b2.pth"
+DATASETS:
+    # 修改为你的COR数据集
+    TRAIN: ("cor_train",)
+    TEST: ("cor_test",)
+    ROOT: "assets/datasets"
+OUTPUT_DIR: "output/cor"

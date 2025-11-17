@@ -1,0 +1,26 @@
+_BASE_: swinL.yaml
+MODEL:
+    WEIGHTS: "assets/pretrained/swin_large_patch4_window12_384_22k.pth"
+    COMMON:
+        NUM_QUERIES: 50  # 减少query数量，从100降到50
+DATASETS:
+    TRAIN: ("cod_train",)
+    TEST: ("cod_test",)
+    ROOT: "/data1/zhy/CODdata/rank"
+LOSS:
+    NUM_POINTS: 3136  # 减少采样点数量，从12544降到3136 (56x56)
+SOLVER:
+    IMS_PER_BATCH: 2  # 2个GPU，每个1张
+    IMS_PER_GPU: 1
+    BASE_LR: 0.0001
+    STEPS: (20000,)
+    MAX_ITER: 30000
+    AMP:
+        ENABLED: True
+INPUT:
+    FT_SIZE_TRAIN: 320
+    FT_SIZE_TEST: 320
+OUTPUT_DIR: "output1/cod_train"
+TEST:
+    METRICS_OF_INTEREST: ["mae", "acc", "fbeta", "iou", "sa_sor", "sor", "ap", "ar", "r_mae"]
+    THRESHOLD: 0.5
