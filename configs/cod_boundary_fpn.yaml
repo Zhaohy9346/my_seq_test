@@ -1,0 +1,57 @@
+_BASE_: swinL.yaml
+
+MODEL:
+    WEIGHTS: "assets/pretrained/swin_large_patch4_window12_384_22k.pth"
+
+    # 使用边界引导FPN
+    NECK:
+        NAME: "BoundaryGuidedFPN"  # 或 "HybridBoundaryFPN" 用于更快实验
+        # USE_BOUNDARY: True  # 仅对HybridBoundaryFPN有效
+        # USE_CONTEXT: True   # 仅对HybridBoundaryFPN有效
+
+    COMMON:
+        NUM_QUERIES: 50  # 适合COD的query数量
+        EMBED_DIM: 256
+        NUM_HEADS: 8
+        HIDDEN_DIM: 2048
+
+DATASETS:
+    TRAIN: ("cod_train",)
+    TEST: ("cod_test",)
+    ROOT: "/data1/zhy/CODdata/rank"
+
+LOSS:
+    NUM_POINTS: 3136  # 56x56，平衡效率和精度
+    CLS_COST: 10.0
+    MASK_CE_COST: 5.0
+    MASK_DICE_COST: 5.0
+    BBOX_L1_COST: 5.0
+    BBOX_GIOU_COST: 2.0
+    SAL_COST: 5.0
+    OBJ_POS: 1.0
+    OBJ_NEG: 0.1
+
+SOLVER:
+    IMS_PER_BATCH: 8  # 4个GPU，每个2张
+    IMS_PER_GPU: 2
+    BASE_LR: 0.0001
+    STEPS: (15000, 25000)
+    MAX_ITER: 30000
+    WARMUP_ITERS: 500
+    CHECKPOINT_PERIOD: 5000
+    AMP:
+        ENABLED: True
+
+INPUT:
+    FT_SIZE_TRAIN: 384  # 训练时使用384分辨率
+    FT_SIZE_TEST: 384
+    MIN_SIZE_TRAIN: (320, 384, 448)  # 多尺度训练
+    MIN_SIZE_TEST: 384
+
+OUTPUT_DIR: "output_cod/boundary_fpn"
+
+TEST:
+    EVAL_PERIOD: 2500
+    METRICS_OF_INTEREST: ["mae", "acc", "fbeta", "iou", "sa_sor", "sor", "ap", "ar", "r_mae"]
+    THRESHOLD: 0.5
+    EVAL_SAVE: False
